@@ -1,0 +1,52 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'com.google.protobuf'
+
+def grpcVersion = '1.0.3' // CURRENT_GRPC_VERSION
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies{
+  compile "io.grpc:grpc-netty:${grpcVersion}"
+  compile "io.grpc:grpc-protobuf:${grpcVersion}"
+  compile "io.grpc:grpc-stub:${grpcVersion}"
+  compile "io.grpc:grpc-services:1.0.0"
+  }
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    // ASSUMES GRADLE 2.12 OR HIGHER. Use plugin version 0.7.5 with earlier
+    // gradle versions
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+  }
+}
+
+protobuf {
+  protoc {
+    artifact = "com.google.protobuf:protoc:3.0.2"
+  }
+  plugins {
+    grpc {
+      artifact = 'io.grpc:protoc-gen-grpc-java:1.0.3'
+    }
+  }
+  generateProtoTasks {
+    all()*.plugins {
+      grpc {}
+    }
+  }
+}
+
+install{
+  repositories.mavenInstaller {
+    pom.version = '1.0.0'
+    pom.artifactId = 'grpc-services'
+    pom.groupId = 'io.grpc'
+  }
+}
